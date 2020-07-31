@@ -70,7 +70,7 @@ whitespaceP :: Parser String
 whitespaceP = spanP isSpace
 
 stringLiteral :: Parser String
-stringLiteral = spanP (/= '"')
+stringLiteral = charP '"' *> spanP (/= '"') <* charP '"'
 
 sepBy :: Parser a -> Parser b -> Parser [b]
 sepBy sep p = liftA2 (:) p $ many (sep *> p) <|> pure []

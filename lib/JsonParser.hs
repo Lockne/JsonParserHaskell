@@ -39,9 +39,9 @@ jsonNumber = (\xs -> JsonNumber $ read xs) <$> notEmpty (spanP isDigit)
 
 -- | Having made a number parsers, let's turn our attention to parsing strings!
 --   In Json, strings are a bunch of literals enclosed in quotes.
---   This is a string: "i am a string"
+--   This is a string: \"i am a string\"
 jsonString :: Parser Json
-jsonString = JsonString <$> (charP '"' *> stringLiteral <* charP '"')
+jsonString = JsonString <$> stringLiteral
 
 -- | Now we can successfully parse null values, boolean values, numbers and strings.
 --   The next two types of values are a bit harder to parse.
@@ -54,7 +54,7 @@ jsonArray =
 
 
 -- | Before we tackle JsonObjects, we will define a helper function pair that
---   a string that looks like " \"name\": value " to (name, Json)
+--   takes a string that looks like " \"name\": value " to (name, Json)
 keyValuePair :: Parser (String, Json)
 keyValuePair = liftA3 (\key _ value -> (key, value)) stringLiteral (whitespaceP *> charP ':' <* whitespaceP) jsonValue
 
