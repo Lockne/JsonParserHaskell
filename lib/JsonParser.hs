@@ -2,17 +2,25 @@ module JsonParser where
 
 import AST
 import Custom
-import Control.Applicative
-import Data.Char
+  ( Parser
+  , charP
+  , notEmpty
+  , sepBy
+  , spanP
+  , stringLiteral
+  , stringP
+  , whitespaceP
+  )
+
+import Control.Applicative ((<|>), liftA2, liftA3, many)
+
+import Data.Char (isDigit)
 
 -- | Okay! Let's make our parser from scratch.
 --   Baby steps is what we'll take.
-
-
 -- | We'll tackle the null value in Json first.
 --   I want to write a function that takes an
 --   input string "null" and returns a value JsonNull
-
 jsonNull :: Parser Json
 jsonNull = (\_ -> JsonNull) <$> stringP "null"
 
@@ -29,8 +37,8 @@ jsonBool = f <$> (stringP "true" <|> stringP "false")
 
 -- | Next in line are numbers! We'll only parse integers for now.
 --   The deal with integers is that we want to parse something
---   like "1234onetwo" and return ("1234", JsonNumber Integer)
---   Also remember that our function might try to parse the
+--   like "1234onetwo" and return ("onetwo", JsonNumber Integer)
+--   , but remember that our function might try to parse the
 --   empty string "". Since we're using read, this will spit
 --   out an Exception error! To fix that we'll make use of a
 --   helper function notEmpty.
@@ -52,11 +60,15 @@ jsonArray =
   where
     value = sepBy (whitespaceP *> charP ',' <* whitespaceP) jsonValue
 
-
 -- | Before we tackle JsonObjects, we will define a helper function pair that
 --   takes a string that looks like " \"name\": value " to (name, Json)
 keyValuePair :: Parser (String, Json)
-keyValuePair = liftA3 (\key _ value -> (key, value)) stringLiteral (whitespaceP *> charP ':' <* whitespaceP) jsonValue
+keyValuePair =
+  liftA3
+    (\key _ value -> (key, value))
+    stringLiteral
+    (whitespaceP *> charP ':' <* whitespaceP)
+    jsonValue
 
 jsonObject :: Parser Json
 jsonObject =

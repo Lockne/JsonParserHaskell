@@ -4,7 +4,7 @@
 module Custom where
 
 
-import Data.Char
+import Data.Char (isSpace)
 import Control.Applicative
 
 newtype Parser a =
